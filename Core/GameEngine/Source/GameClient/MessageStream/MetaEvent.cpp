@@ -63,6 +63,7 @@
 
 // TheSuperHackers @feature for grid hotkeys yielding to command bar buttons
 #include "Common/GlobalData.h"
+#include "Common/OptionPreferences.h"
 #include "GameClient/HotKey.h"
 #include "GameClient/Keyboard.h"
 
@@ -638,7 +639,13 @@ void MetaEventTranslator::onKeyEvent(const GameMessage *msg, GameMessageDisposit
 					AsciiString aKey;
 					aKey.translate( uKey );
 
-					if( aKey.isNotEmpty() && TheHotKeyManager->isHotKeyClaimed( aKey ) )
+					// A key on the exclusion list keeps its meta event no matter what, which is the
+					// whole point of listing it -- otherwise a button that took the key through the
+					// string file fallback would still shadow it.
+					const Bool nonGrid = OptionPreferences::isNonGridHotkeyInList(
+							TheGlobalData->m_nonGridHotkeys, aKey );
+
+					if( !nonGrid && aKey.isNotEmpty() && TheHotKeyManager->isHotKeyClaimed( aKey ) )
 					{
 						disp = KEEP_MESSAGE;	// let HotKeyTranslator have it
 						break;
