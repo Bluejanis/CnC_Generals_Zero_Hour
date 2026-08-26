@@ -149,6 +149,11 @@ public:
 	Bool m_useAlternateMouse;
 	Bool m_useRightMouseScrollWithAlternateMouse; // TheSuperHackers @feature User option for RMB scroll in Alternate Mouse mode.
 	Bool m_clientRetaliationModeEnabled;
+	// TheSuperHackers @feature Show each command bar cameo's hotkey letter on the cameo.
+	Bool m_keyboardOverlayEnabled;
+	Color m_keyboardOverlayColor;
+	Bool m_keyboardOverlayBackdrop;
+	Color m_keyboardOverlayBackdropColor;
 	Bool m_doubleClickAttackMove;
 	// TheSuperHackers @feature Command bar keys by slot position instead of by string file.
 	Bool m_gridHotkeysEnabled;

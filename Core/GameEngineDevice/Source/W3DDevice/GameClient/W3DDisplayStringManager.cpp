@@ -35,6 +35,8 @@
 #include "GameClient/DisplayString.h"
 #include "GameClient/DrawGroupInfo.h"
 #include "W3DDevice/GameClient/W3DDisplayStringManager.h"
+// TheSuperHackers @feature for the hotkey overlay string teardown
+#include "W3DDevice/GameClient/W3DGadget.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -55,6 +57,11 @@ W3DDisplayStringManager::W3DDisplayStringManager()
 //-------------------------------------------------------------------------------------------------
 W3DDisplayStringManager::~W3DDisplayStringManager()
 {
+	// TheSuperHackers @feature The hotkey overlay's shared strings must come back to the
+	// manager while it is still alive; the base class destructor asserts on any string
+	// left registered.
+	W3DGadgetPushButtonFreeHotKeyStrings();
+
 	for (Int i = 0; i < MAX_GROUPS; ++i)
 	{
 		if (m_groupNumeralStrings[i])

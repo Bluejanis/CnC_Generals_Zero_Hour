@@ -1106,6 +1106,10 @@ GlobalData::GlobalData()
 	// GeneralsX @bugfix Meeseeks 18/06/2026 Default to TRUE to allow right-click drag scrolling under alternate controls by default
 	m_useRightMouseScrollWithAlternateMouse = TRUE;
 	m_clientRetaliationModeEnabled = TRUE; //On by default.
+	m_keyboardOverlayEnabled = FALSE;
+	m_keyboardOverlayColor = GameMakeColor( 255, 255, 255, 255 );
+	m_keyboardOverlayBackdrop = TRUE;
+	m_keyboardOverlayBackdropColor = GameMakeColor( 0, 0, 0, 128 );
 	m_doubleClickAttackMove = FALSE;
 	m_gridHotkeysEnabled = FALSE;
 	m_gridHotkeyLayout.clear();
@@ -1269,6 +1273,10 @@ void GlobalData::parseGameDataDefinition( INI* ini )
 	TheWritableGlobalData->m_gridHotkeyLayout = optionPref.getGridHotkeyLayout();
 	TheWritableGlobalData->m_gridHotkeyColumns = optionPref.getGridHotkeyColumns();
 	TheWritableGlobalData->m_nonGridHotkeys = optionPref.getNonGridHotkeys();
+	TheWritableGlobalData->m_keyboardOverlayEnabled = optionPref.getKeyboardOverlayEnabled();
+	TheWritableGlobalData->m_keyboardOverlayColor = optionPref.getKeyboardOverlayColor();
+	TheWritableGlobalData->m_keyboardOverlayBackdrop = optionPref.getKeyboardOverlayBackdropEnabled();
+	TheWritableGlobalData->m_keyboardOverlayBackdropColor = optionPref.getKeyboardOverlayBackdropColor();
 	TheWritableGlobalData->m_jpegQuality = optionPref.getJpegQuality();
 	TheWritableGlobalData->m_keyboardScrollFactor = optionPref.getScrollFactor();
 	TheWritableGlobalData->m_drawScrollAnchor = optionPref.getDrawScrollAnchor();

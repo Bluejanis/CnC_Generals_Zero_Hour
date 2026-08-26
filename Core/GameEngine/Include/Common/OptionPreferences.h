@@ -34,6 +34,7 @@
 #include "WW3D2/texturefilter.h"
 
 #include "Common/UserPreferences.h"
+#include "GameClient/Color.h"
 
 typedef UnsignedInt CursorCaptureMode;
 typedef UnsignedInt ScreenEdgeScrollMode;
@@ -84,6 +85,10 @@ public:
 	// TheSuperHackers @feature Exposed statically so GlobalData can test its cached copy of the
 	// list without re-reading Options.ini on every command bar rebuild.
 	static Bool isNonGridHotkeyInList(const AsciiString& list, const AsciiString& key);
+	Bool getKeyboardOverlayEnabled() const;
+	Color getKeyboardOverlayColor() const;
+	Bool getKeyboardOverlayBackdropEnabled() const;
+	Color getKeyboardOverlayBackdropColor() const;
 	Bool getCursorCaptureEnabledInWindowedGame() const;
 	Bool getCursorCaptureEnabledInWindowedMenu() const;
 	Bool getCursorCaptureEnabledInFullscreenGame() const;
@@ -184,4 +189,8 @@ public:
 	void setPostProcessHDR(Bool val);
 	void setPostProcessFXAA(Bool val);
 	void setAirUnitGroundIndicator(Bool val);
+
+private:
+	// TheSuperHackers @feature Read one 0-255 colour channel, clamped, with a fallback.
+	UnsignedByte getColorChannel(const char *keyName, UnsignedByte defaultValue) const;
 };
