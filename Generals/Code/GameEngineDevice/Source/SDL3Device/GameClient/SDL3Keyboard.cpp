@@ -333,6 +333,41 @@ KeyVal SDL3Keyboard::translateScanCodeToKeyVal(unsigned char scan)
 		case SDL_SCANCODE_Y: return KEY_Y;
 		case SDL_SCANCODE_Z: return KEY_Z;
 
+		// GeneralsX @bugfix 16/11/2026 Map punctuation, numpad and lock keys so they work as hotkeys on macOS and Linux too
+		case SDL_SCANCODE_MINUS: return KEY_MINUS;
+		case SDL_SCANCODE_EQUALS: return KEY_EQUAL;
+		case SDL_SCANCODE_LEFTBRACKET: return KEY_LBRACKET;
+		case SDL_SCANCODE_RIGHTBRACKET: return KEY_RBRACKET;
+		case SDL_SCANCODE_BACKSLASH: return KEY_BACKSLASH;
+		case SDL_SCANCODE_NONUSHASH: return KEY_BACKSLASH;
+		case SDL_SCANCODE_SEMICOLON: return KEY_SEMICOLON;
+		case SDL_SCANCODE_APOSTROPHE: return KEY_APOSTROPHE;
+		case SDL_SCANCODE_GRAVE: return KEY_TICK;
+		case SDL_SCANCODE_COMMA: return KEY_COMMA;
+		case SDL_SCANCODE_PERIOD: return KEY_PERIOD;
+		case SDL_SCANCODE_SLASH: return KEY_SLASH;
+		case SDL_SCANCODE_NONUSBACKSLASH: return KEY_102;
+		case SDL_SCANCODE_INSERT: return KEY_INS;
+		case SDL_SCANCODE_CAPSLOCK: return KEY_CAPS;
+		case SDL_SCANCODE_SCROLLLOCK: return KEY_SCROLL;
+		case SDL_SCANCODE_NUMLOCKCLEAR: return KEY_NUM;
+		case SDL_SCANCODE_PRINTSCREEN: return KEY_SYSREQ;
+		case SDL_SCANCODE_KP_DIVIDE: return KEY_KPSLASH;
+		case SDL_SCANCODE_KP_MULTIPLY: return KEY_KPSTAR;
+		case SDL_SCANCODE_KP_MINUS: return KEY_KPMINUS;
+		case SDL_SCANCODE_KP_PLUS: return KEY_KPPLUS;
+		case SDL_SCANCODE_KP_PERIOD: return KEY_KPDEL;
+		case SDL_SCANCODE_KP_1: return KEY_KP1;
+		case SDL_SCANCODE_KP_2: return KEY_KP2;
+		case SDL_SCANCODE_KP_3: return KEY_KP3;
+		case SDL_SCANCODE_KP_4: return KEY_KP4;
+		case SDL_SCANCODE_KP_5: return KEY_KP5;
+		case SDL_SCANCODE_KP_6: return KEY_KP6;
+		case SDL_SCANCODE_KP_7: return KEY_KP7;
+		case SDL_SCANCODE_KP_8: return KEY_KP8;
+		case SDL_SCANCODE_KP_9: return KEY_KP9;
+		case SDL_SCANCODE_KP_0: return KEY_KP0;
+
 		default:
 			// TODO: Phase 2 - Complete mapping
 			return KEY_NONE;
