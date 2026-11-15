@@ -160,7 +160,7 @@ void NGMP_OnlineServicesManager::shutdown() {
 
     stopReplayWorker();
 
-    logout();
+    endSession();
 
     {
         std::lock_guard<std::mutex> lock(m_replayMutex);

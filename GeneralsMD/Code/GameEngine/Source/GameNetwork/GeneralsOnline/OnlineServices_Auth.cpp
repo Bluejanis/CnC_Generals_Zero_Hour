@@ -502,7 +502,14 @@ void NGMP_OnlineServicesManager::loginWithRefreshToken(const std::string& refres
     });
 }
 
+// GeneralsX @bugfix Bluejanis 16/11/2026 Logging out forgets the saved login; ending a session keeps it
 void NGMP_OnlineServicesManager::logout() {
+    endSession();
+    NGMP::SaveAuthToken("");
+    NGMP::SaveRefreshToken("");
+}
+
+void NGMP_OnlineServicesManager::endSession() {
     {
         std::lock_guard<std::mutex> lock(m_authMutex);
         m_authToken.clear();
@@ -515,8 +522,6 @@ void NGMP_OnlineServicesManager::logout() {
     m_sessionGeneration++;
     m_lastMatchProgressTime = {};
     m_lastMatchProgressMatchId = 0;
-    NGMP::SaveAuthToken("");
-    NGMP::SaveRefreshToken("");
 }
 
 // GeneralsX @feature fbraz3 19/09/2026 Silent synchronous token refresh using saved refresh token
