@@ -177,6 +177,7 @@ public:
     int getOnlinePlayersCount() const { return m_onlinePlayersCount.load(); }
 
     void logout();
+    void endSession();
     bool ensureWebSocketConnected();
 
     // Async lobby fetch — result delivered via EVENT_LOBBY_LIST_UPDATED
