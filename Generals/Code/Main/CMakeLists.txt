@@ -67,6 +67,8 @@ endif()
 
 if(MSVC)
     target_link_options(g_generals PRIVATE "/NODEFAULTLIB:libci.lib")
+    # GeneralsX @bugfix 16/11/2026 Let the 32-bit game use 4 GB of address space; at 4K it runs out of 2 GB while loading a map.
+    target_link_options(g_generals PRIVATE "/LARGEADDRESSAWARE")
 endif()
 
 target_include_directories(g_generals PRIVATE
