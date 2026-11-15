@@ -67,6 +67,8 @@ endif()
 
 if(MSVC)
     target_link_options(g_generals PRIVATE "/NODEFAULTLIB:libci.lib")
+    # GeneralsX @bugfix Bluejanis 16/11/2026 4 GB address space; 2 GB runs out loading maps at 4K
+    target_link_options(g_generals PRIVATE "/LARGEADDRESSAWARE")
 endif()
 
 target_include_directories(g_generals PRIVATE
