@@ -160,7 +160,8 @@ void NGMP_OnlineServicesManager::shutdown() {
 
     stopReplayWorker();
 
-    logout();
+    // GeneralsX @bugfix 16/11/2026 Keep the saved login so the next launch logs in without the browser
+    endSession();
 
     {
         std::lock_guard<std::mutex> lock(m_replayMutex);
