@@ -1,5 +1,5 @@
-Inoffizieller Build von GeneralsX 1.0.6 (Zero Hour) mit ein paar Zusatz-Fixes.
-Spiellogik unverändert: online und im LAN zusammen mit normalem GeneralsX 1.0.6 spielbar.
+Inoffizieller Build von GeneralsX 1.0.7 (Zero Hour) mit ein paar Zusatz-Fixes.
+Spiellogik unverändert: online und im LAN zusammen mit normalem GeneralsX 1.0.7 spielbar.
 
 **Enthalten**
 - Discord-Login bleibt nach dem Beenden gespeichert
@@ -23,4 +23,4 @@ Das `Y` ist auf deutschen Tastaturen die Z-Taste (das Spiel liest Tasten nach US
 - Mac: `macos-arm64-GeneralsXZH.zip` entpacken, `GeneralsXZH.app` nach Programme ziehen,
   beim ersten Start Rechtsklick > Öffnen.
 
-Quellcode: Branch `release/1.0.6-bluejanis`. Nicht von den GeneralsX-Entwicklern.
+Quellcode: Branch `release/1.0.7-bluejanis`. Nicht von den GeneralsX-Entwicklern.
