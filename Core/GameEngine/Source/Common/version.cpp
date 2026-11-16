@@ -407,7 +407,7 @@ AsciiString Version::buildAsciiGitTagOrHash()
 	AsciiString str;
 	str.format("%s%s",
 		GitUncommittedChanges ? "~" : "",
-		GitTag[0] ? GitTag : GitShortSHA1);
+		GitDisplayTag[0] ? GitDisplayTag : GitShortSHA1);
 	return str;
 }
 
@@ -460,9 +460,9 @@ UnicodeString Version::getUnicodeProjectWatermark() const
 	char finalCredit[256];
 	char versionSuffix[128] = "";
 
-	if (GitTag && GitTag[0] != '\0')
+	if (GitDisplayTag[0] != '\0')
 	{
-		const char* tagBase = GitTag;
+		const char* tagBase = GitDisplayTag;
 		if (strncmp(tagBase, "generalsx-", 10) == 0 || strncmp(tagBase, "GeneralsX-", 10) == 0)
 		{
 			tagBase += 10;
