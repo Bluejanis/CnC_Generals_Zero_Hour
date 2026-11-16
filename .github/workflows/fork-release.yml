@@ -1,11 +1,11 @@
 name: Fork release
 
-# Builds macOS on a "*-bluejanis.*" tag and publishes the Zero Hour zip as a release.
+# Builds macOS on a "*-bluejanis-<date>[-<hhmm>]" tag and publishes the Zero Hour zip as a release.
 # The Windows zip is built locally and added with "gh release upload".
 on:
   push:
     tags:
-      - "*-bluejanis.*"
+      - "*-bluejanis-*"
 
 permissions:
   contents: write
