@@ -328,6 +328,13 @@ UnicodeString Version::getUnicodeProductTitle() const
 
 UnicodeString Version::getUnicodeProductVersion() const
 {
+	// GeneralsX @tweak Bluejanis 16/11/2026 Release name instead of the commit count
+	if (GitReleaseName[0] != '\0')
+	{
+		UnicodeString version;
+		version.translate(GitReleaseName);
+		return version;
+	}
 	return getUnicodeGitVersion();
 }
 
@@ -460,9 +467,9 @@ UnicodeString Version::getUnicodeProjectWatermark() const
 	char finalCredit[256];
 	char versionSuffix[128] = "";
 
-	if (GitTag && GitTag[0] != '\0')
+	if (GitReleaseName[0] != '\0')
 	{
-		const char* tagBase = GitTag;
+		const char* tagBase = GitReleaseName;
 		if (strncmp(tagBase, "generalsx-", 10) == 0 || strncmp(tagBase, "GeneralsX-", 10) == 0)
 		{
 			tagBase += 10;
