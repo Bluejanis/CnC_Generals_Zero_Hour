@@ -630,6 +630,12 @@ void createGame()
 
 	UnicodeString gameName = GadgetTextEntryGetText(textEntryGameName);
 
+	// GeneralsX @bugfix Bluejanis 16/11/2026 Drop the name left over from the last joined lobby
+	if (TheGameSpyGame)
+		TheGameSpyGame->setGameName(gameName);
+	if (TheNGMPGame)
+		TheNGMPGame->setGameName(gameName);
+
 	AsciiString passwd;
 	passwd.translate(GadgetTextEntryGetText(textEntryGamePassword));
 

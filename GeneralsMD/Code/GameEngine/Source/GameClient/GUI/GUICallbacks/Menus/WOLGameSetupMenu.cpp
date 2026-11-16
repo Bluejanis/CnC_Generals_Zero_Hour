@@ -2011,6 +2011,20 @@ static void fillPlayerInfo(const PeerResponse *resp, PlayerInfo *info)
 	info->m_preorder	= resp->player.preorder;
 }
 
+#if defined(SAGE_USE_NGMP)
+// GeneralsX @bugfix Bluejanis 16/11/2026 Title from the server's lobby name; TheGameSpyGame keeps the last joined one
+static void showLobbyName()
+{
+	if (TheNGMPGame == nullptr || TheNGMPGame->getGameName().isEmpty() || parentWOLGameSetup == nullptr)
+		return;
+
+	GameWindow *title = TheWindowManager->winGetWindowFromId(parentWOLGameSetup,
+		NAMEKEY("GameSpyGameOptionsMenu.wnd:StaticTextGameName"));
+	if (title)
+		GadgetStaticTextSetText(title, TheNGMPGame->getGameName());
+}
+#endif
+
 //-------------------------------------------------------------------------------------------------
 /** Lan Game Options menu update method */
 //-------------------------------------------------------------------------------------------------
@@ -2026,6 +2040,7 @@ void WOLGameSetupMenuUpdate( WindowLayout * layout, void *userData)
 					TheNGMPGame->SyncWithLobby(pLobbyInterface->GetCurrentLobby());
 				}
 				TheNGMPGame->UpdateSlotsFromCurrentLobby();
+				showLobbyName();
 			}
 			NGMP_OnlineServices_LobbyInterface* pLobbyInterface = NGMP_OnlineServicesManager::GetInterface<NGMP_OnlineServices_LobbyInterface>();
 			if (pLobbyInterface && pLobbyInterface->IsHost()) {
