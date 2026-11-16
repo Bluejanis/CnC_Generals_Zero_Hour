@@ -44,3 +44,6 @@ AsciiString GetReadmeFromMap( const AsciiString &path );
 
 // The meat of file (map) transfers
 Bool DoAnyMapTransfers(GameInfo *game);
+
+// GeneralsX @feature Bluejanis 16/11/2026 Appends to MapTransfer.log in the user data folder and stderr, in all builds
+void LogMapTransfer(const char *format, ...);

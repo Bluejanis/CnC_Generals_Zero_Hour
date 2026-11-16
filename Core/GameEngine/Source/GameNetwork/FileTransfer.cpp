@@ -31,13 +31,61 @@
 #include "PreRTS.h"	// This must go first in EVERY cpp file in the GameEngine
 
 #include "Common/FileSystem.h"
+#include "Common/GlobalData.h"
 #include "GameClient/LoadScreen.h"
 #include "GameClient/Shell.h"
 #include "GameNetwork/FileTransfer.h"
 #include "GameNetwork/networkutil.h"
 
+#include <stdarg.h>
+#include <time.h>
+
 //-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------
+
+void LogMapTransfer(const char *format, ...)
+{
+	char message[1024];
+	va_list args;
+	va_start(args, format);
+	vsnprintf(message, sizeof(message), format, args);
+	va_end(args);
+
+	char stamp[32];
+	time_t now = time(nullptr);
+	strftime(stamp, sizeof(stamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+	fprintf(stderr, "[MapTransfer] %s\n", message);
+	fflush(stderr);
+
+	if (TheGlobalData == nullptr)
+		return;
+
+	const long MaxLogBytes = 512 * 1024;
+	static Bool checkedLogSize = FALSE;
+	AsciiString logPath = TheGlobalData->getPath_UserData();
+	logPath.concat("MapTransfer.log");
+	const char *mode = "a";
+	if (!checkedLogSize)
+	{
+		checkedLogSize = TRUE;
+		FILE *existing = fopen(logPath.str(), "rb");
+		if (existing)
+		{
+			fseek(existing, 0, SEEK_END);
+			if (ftell(existing) > MaxLogBytes)
+				mode = "w";
+			fclose(existing);
+		}
+	}
+
+	FILE *log = fopen(logPath.str(), mode);
+	if (log)
+	{
+		fprintf(log, "%s %s\n", stamp, message);
+		fclose(log);
+	}
+}
 
 static Bool doFileTransfer( AsciiString filename, MapTransferLoadScreen *ls, Int mask )
 {
@@ -69,6 +117,11 @@ static Bool doFileTransfer( AsciiString filename, MapTransferLoadScreen *ls, Int
 		}
 
 		DEBUG_LOG(("Starting file transfer loop"));
+		LogMapTransfer("Transfer of '%s' to mask %X started, %s", filename.str(), mask,
+			TheGameInfo->amIHost() ? "sending" : "receiving");
+		Int lastSlotPercent[MAX_SLOTS];
+		for (i=0; i<MAX_SLOTS; ++i)
+			lastSlotPercent[i] = -1;
 
 		while (!fileTransferDone)
 		{
@@ -87,6 +140,11 @@ static Bool doFileTransfer( AsciiString filename, MapTransferLoadScreen *ls, Int
 				{
 					Int slotTransferPercent = TheNetwork->getFileTransferProgress(i, filename);
 					fileTransferPercent = min(fileTransferPercent, slotTransferPercent);
+					if (slotTransferPercent != lastSlotPercent[i])
+					{
+						LogMapTransfer("Slot %d is at %d%% for '%s'", i, slotTransferPercent, filename.str());
+						lastSlotPercent[i] = slotTransferPercent;
+					}
 
 					if (slotTransferPercent == 0)
 						ls->processProgress(i, slotTransferPercent, "MapTransfer:Preparing");
@@ -107,6 +165,7 @@ static Bool doFileTransfer( AsciiString filename, MapTransferLoadScreen *ls, Int
 			else
 			{
 				DEBUG_LOG(("File transfer is 100%%!"));
+				LogMapTransfer("Transfer of '%s' done", filename.str());
 				ls->processProgress(0, fileTransferPercent, "MapTransfer:Done");
 			}
 
@@ -114,6 +173,7 @@ static Bool doFileTransfer( AsciiString filename, MapTransferLoadScreen *ls, Int
 			if (now > startTime + timeoutPeriod) // bail if we don't finish in a reasonable amount of time
 			{
 				DEBUG_LOG(("Timing out file transfer"));
+				LogMapTransfer("Transfer of '%s' timed out at %d%%", filename.str(), fileTransferPercent);
 				break;
 			}
 			else
@@ -216,6 +276,10 @@ Bool DoAnyMapTransfers(GameInfo *game)
 	if (!mask)
 		return TRUE;
 
+	LogMapTransfer("Map '%s' needs a transfer to mask %X (contents %X, local slot %d%s)",
+		game->getMap().str(), mask, game->getMapContentsMask(), game->getLocalSlotNum(),
+		game->amIHost() ? ", host" : "");
+
 	TheShell->hideShell();
 	MapTransferLoadScreen *ls = NEW MapTransferLoadScreen;
 	ls->init(TheGameInfo);
@@ -236,6 +300,7 @@ Bool DoAnyMapTransfers(GameInfo *game)
 		ok = doFileTransfer(game->getMap(), ls, mask);
 	delete ls;
 	ls = nullptr;
+	LogMapTransfer("Map transfer %s", ok ? "succeeded" : "FAILED");
 	if (!ok)
 		TheShell->showShell();
 	return ok;

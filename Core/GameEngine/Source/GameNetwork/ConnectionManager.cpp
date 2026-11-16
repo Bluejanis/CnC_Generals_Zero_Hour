@@ -43,6 +43,7 @@
 #include "GameClient/GameText.h"
 #include "GameClient/MessageBox.h"
 #include "GameNetwork/ConnectionManager.h"
+#include "GameNetwork/FileTransfer.h"
 #include "GameNetwork/LANAPICallbacks.h"
 #include "GameNetwork/NAT.h"
 #include "GameNetwork/NetCommandWrapperList.h"
@@ -54,6 +55,12 @@
 #include "GameClient/DisconnectMenu.h"
 #include "GameClient/InGameUI.h"
 #include "WWLib/TARGA.h"
+
+#include <set>
+#include <string>
+
+// Progress lookups already logged as unmatched, keyed by path and the number of registered transfers
+static std::set<std::string> s_unmatchedTransferLookups;
 
 static Bool hasValidTransferFileExtension(const AsciiString& filePath)
 {
@@ -239,6 +246,7 @@ ConnectionManager::~ConnectionManager()
 	m_netCommandWrapperList = nullptr;
 
 	s_fileCommandMap.clear();
+	s_unmatchedTransferLookups.clear();
 	s_fileRecipientMaskMap.clear();
 	for (i = 0; i < MAX_SLOTS; ++i) {
 		s_fileProgressMap[i].clear();
@@ -331,6 +339,7 @@ void ConnectionManager::init()
 	m_netCommandWrapperList->init();
 
 	s_fileCommandMap.clear();
+	s_unmatchedTransferLookups.clear();
 	s_fileRecipientMaskMap.clear();
 	for (i = 0; i < MAX_SLOTS; ++i) {
 		s_fileProgressMap[i].clear();
@@ -787,8 +796,11 @@ void ConnectionManager::processFile(NetFileCommandMsg *msg)
 #endif
 
 	AsciiString realFileName = msg->getRealFilename();
+	LogMapTransfer("Received '%s' (%d bytes) from slot %d as '%s'", msg->getPortableFilename().str(),
+		msg->getFileLength(), msg->getPlayerID(), realFileName.str());
 	if (realFileName.isEmpty())
 	{
+		LogMapTransfer("Dropped '%s': path does not resolve inside the map folders", msg->getPortableFilename().str());
 		// TheSuperHackers @security slurmlord 18/06/2025 As the file name/path from the NetFileCommandMsg failed to normalize,
 		// in other words is bogus and points outside of the approved target directory, avoid an arbitrary file overwrite vulnerability
 		// by simply returning and let the transfer time out.
@@ -799,6 +811,7 @@ void ConnectionManager::processFile(NetFileCommandMsg *msg)
 	// TheSuperHackers @security bobtista 06/11/2025 Validate file extension to prevent arbitrary file types
 	if (!hasValidTransferFileExtension(realFileName))
 	{
+		LogMapTransfer("Dropped '%s': file type not allowed", realFileName.str());
 		DEBUG_LOG(("File '%s' has invalid extension for transfer operations.", realFileName.str()));
 		return;
 	}
@@ -838,6 +851,7 @@ void ConnectionManager::processFile(NetFileCommandMsg *msg)
 	// TheSuperHackers @security bobtista 12/02/2026 Validate file content in memory before writing to disk
 	if (!hasValidTransferFileContent(realFileName, buf, len))
 	{
+		LogMapTransfer("Dropped '%s': content check failed (%d bytes)", realFileName.str(), len);
 		DEBUG_LOG(("File '%s' failed content validation. Transfer aborted.", realFileName.str()));
 #ifdef COMPRESS_TARGAS
 		if (deleteBuf)
@@ -856,11 +870,13 @@ void ConnectionManager::processFile(NetFileCommandMsg *msg)
 		fp->close();
 		fp = nullptr;
 		DEBUG_LOG(("Wrote %d bytes to file %s!", len, realFileName.str()));
+		LogMapTransfer("Wrote %d bytes to '%s'", len, realFileName.str());
 
 	}
 	else
 	{
 		DEBUG_LOG(("Cannot open file!"));
+		LogMapTransfer("Cannot write '%s'", realFileName.str());
 	}
 
 	DEBUG_LOG(("ConnectionManager::processFile() - sending a NetFileProgressCommandMsg"));
@@ -896,6 +912,8 @@ void ConnectionManager::processFile(NetFileCommandMsg *msg)
 void ConnectionManager::processFileAnnounce(NetFileAnnounceCommandMsg *msg)
 {
 	DEBUG_LOG(("ConnectionManager::processFileAnnounce() - expecting '%s' (%s) in command %d", msg->getPortableFilename().str(), msg->getRealFilename().str(), msg->getFileID()));
+	LogMapTransfer("Announced '%s' as '%s', transfer %d to mask %X", msg->getPortableFilename().str(),
+		msg->getRealFilename().str(), msg->getFileID(), msg->getPlayerMask());
 	s_fileCommandMap[msg->getFileID()] = msg->getRealFilename();
 	s_fileRecipientMaskMap[msg->getFileID()] = msg->getPlayerMask();
 	for (Int i=0; i<MAX_SLOTS; ++i)
@@ -921,6 +939,7 @@ void ConnectionManager::processFileProgress(NetFileProgressCommandMsg *msg)
 		return;
 	}
 	const UnsignedShort fileID = msg->getFileID();
+	LogMapTransfer("Slot %u reports transfer %d at %d%%", playerID, fileID, msg->getProgress());
 	const Int oldProgress = s_fileProgressMap[playerID][fileID];
 	s_fileProgressMap[playerID][fileID] = max(oldProgress, msg->getProgress());
 }
@@ -2265,6 +2284,7 @@ UnsignedShort ConnectionManager::sendFileAnnounce(AsciiString path, UnsignedByte
 	{
 		UnicodeString log;
 		log.format(L"Not sending file '%hs' to %X", path.str(), playerMask);
+		LogMapTransfer("Not sending '%s' to mask %X: missing or empty", path.str(), playerMask);
 		DEBUG_LOG_LEVEL(DEBUG_LEVEL_NET, ("%ls", log.str()));
 		if (TheLAN)
 			TheLAN->OnChat(L"sendFile", 0, log, LANAPI::LANCHAT_SYSTEM);
@@ -2303,6 +2323,7 @@ void ConnectionManager::sendFile(AsciiString path, UnsignedByte playerMask, Unsi
 	{
 		UnicodeString log;
 		log.format(L"Not sending file '%hs' to %X", path.str(), playerMask);
+		LogMapTransfer("Not sending '%s' to mask %X: missing or empty", path.str(), playerMask);
 		DEBUG_LOG_LEVEL(DEBUG_LEVEL_NET, ("%ls", log.str()));
 		if (TheLAN)
 			TheLAN->OnChat(L"sendFile", 0, log, LANAPI::LANCHAT_SYSTEM);
@@ -2356,6 +2377,7 @@ void ConnectionManager::sendFile(AsciiString path, UnsignedByte playerMask, Unsi
 #endif // COMPRESS_TARGAS
 
 	DEBUG_LOG_LEVEL(DEBUG_LEVEL_NET, ("Sending file: '%s', len %d, to %X", path.str(), len, playerMask));
+	LogMapTransfer("Sending '%s' (%d bytes) to mask %X as transfer %d", path.str(), len, playerMask, commandID);
 
 	sendLocalCommand(fileMsg, playerMask);
 
@@ -2377,6 +2399,15 @@ Int ConnectionManager::getFileTransferProgress(Int playerID, AsciiString path)
 	}
 	//DEBUG_LOG(("Falling back to 0, since we couldn't find the map"));
 	DEBUG_LOG_LEVEL(DEBUG_LEVEL_NET, ("ConnectionManager::getFileTransferProgress: path %s not found",path.str()));
+	// runs every frame of the transfer screen, so log only when a new transfer could have matched
+	char lookupKey[16];
+	snprintf(lookupKey, sizeof(lookupKey), "#%u", (unsigned)s_fileCommandMap.size());
+	if (s_unmatchedTransferLookups.insert(std::string(path.str()) + lookupKey).second)
+	{
+		LogMapTransfer("No transfer registered for '%s'; known transfers:", path.str());
+		for (FileCommandMap::iterator it = s_fileCommandMap.begin(); it != s_fileCommandMap.end(); ++it)
+			LogMapTransfer("  %d: '%s'", it->first, it->second.str());
+	}
 	return 0;
 }
 
