@@ -46,6 +46,7 @@
 
 // SYSTEM INCLUDES ////////////////////////////////////////////////////////////
 #include <stdlib.h>
+#include <wctype.h>
 
 // USER INCLUDES //////////////////////////////////////////////////////////////
 #include "GameClient/Gadget.h"
@@ -59,6 +60,7 @@
 #include "GameClient/GameFont.h"
 #include "GameClient/GlobalLanguage.h"
 #include "GameClient/HotKey.h"
+#include "GameClient/Keyboard.h"
 #include "W3DDevice/GameClient/W3DGameWindow.h"
 #include "W3DDevice/GameClient/W3DDisplay.h"
 #include "W3DDevice/GameClient/W3DGadget.h"
@@ -107,6 +109,21 @@ void W3DGadgetPushButtonFreeHotKeyStrings( void )
 	}
 }
 
+// GeneralsX @feature Bluejanis 16/11/2026
+static WideChar hotKeyLabel( UnsignedByte hotKey )
+{
+	if( TheKeyboard != nullptr )
+	{
+		for( Int key = 0; key < 256; ++key )
+		{
+			if( TheKeyboard->getPrintableKey( (KeyDefType)key, 0 ) == (WideChar)hotKey )
+				return TheKeyboard->getLayoutKeyLabel( (KeyDefType)key );
+		}
+	}
+
+	return (WideChar)hotKey;
+}
+
 // drawButtonHotKeyOverlay ====================================================
 /** Draw the keyboard hotkey letter over a command bar cameo, so the player can
 	* learn the shortcuts without hunting through tooltips.
@@ -153,8 +170,7 @@ static void drawButtonHotKeyOverlay( GameWindow *window )
 
 		// the manager stores keys lowercased, but shortcuts read better as capitals
 		UnicodeString text;
-		WideChar upper = (WideChar)toupper( (Int)index );
-		text.concat( upper );
+		text.concat( (WideChar)towupper( hotKeyLabel( index ) ) );
 		hotKeyString->setText( text );
 
 		s_hotKeyStrings[ index ] = hotKeyString;

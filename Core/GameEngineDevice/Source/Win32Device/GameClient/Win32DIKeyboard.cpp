@@ -30,6 +30,7 @@
 
 #include <windows.h>
 #include <assert.h>
+#include <wctype.h>
 
 #include "Common/Debug.h"
 #include "Common/Language.h"
@@ -425,4 +426,18 @@ Bool DirectInputKeyboard::getCapsState()
 
 	return BitIsSet( GetKeyState( VK_CAPITAL ), 0X01);
 
+}
+
+// GeneralsX @feature Bluejanis 16/11/2026 Ask Windows which character the active layout puts on this scan code
+WideChar DirectInputKeyboard::getLayoutKeyLabel( KeyDefType key )
+{
+	HKL layout = GetKeyboardLayout( 0 );
+	UINT virtualKey = MapVirtualKeyExW( (UINT)key, MAPVK_VSC_TO_VK, layout );
+	UINT character = virtualKey ? MapVirtualKeyExW( virtualKey, MAPVK_VK_TO_CHAR, layout ) : 0;
+
+	// zero means no character, the high bit marks a dead key
+	if( character == 0 || ( character & 0x80000000 ) )
+		return Keyboard::getLayoutKeyLabel( key );
+
+	return (WideChar)towlower( (wint_t)character );
 }

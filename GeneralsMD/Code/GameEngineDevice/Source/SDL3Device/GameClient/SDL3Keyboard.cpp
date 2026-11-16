@@ -120,6 +120,24 @@ Bool SDL3Keyboard::getCapsState(void)
 	return 0;
 }
 
+// GeneralsX @feature Bluejanis 16/11/2026 Ask SDL which key the active layout puts on this position
+WideChar SDL3Keyboard::getLayoutKeyLabel(KeyDefType key)
+{
+	for (Int scan = 0; scan < 256; ++scan)
+	{
+		if (translateScanCodeToKeyVal((unsigned char)scan) != (KeyVal)key)
+			continue;
+
+		// keycodes of character keys are their Unicode character
+		SDL_Keycode code = SDL_GetKeyFromScancode((SDL_Scancode)scan, SDL_KMOD_NONE, false);
+		if (code > 0x20 && code < 0x10000)
+			return (WideChar)code;
+		break;
+	}
+
+	return Keyboard::getLayoutKeyLabel(key);
+}
+
 /**
  * Get next keyboard event (called by parent Keyboard::update())
  * Fighter19 pattern: check for SDL_EVENT_FIRST sentinel (means empty)
