@@ -1106,12 +1106,12 @@ GlobalData::GlobalData()
 	// GeneralsX @bugfix Meeseeks 18/06/2026 Default to TRUE to allow right-click drag scrolling under alternate controls by default
 	m_useRightMouseScrollWithAlternateMouse = TRUE;
 	m_clientRetaliationModeEnabled = TRUE; //On by default.
-	m_keyboardOverlayEnabled = FALSE;
+	m_keyboardOverlayEnabled = TRUE; // GeneralsX @tweak Bluejanis 16/11/2026
 	m_keyboardOverlayColor = GameMakeColor( 255, 255, 255, 255 );
 	m_keyboardOverlayBackdrop = TRUE;
 	m_keyboardOverlayBackdropColor = GameMakeColor( 0, 0, 0, 128 );
 	m_doubleClickAttackMove = FALSE;
-	m_gridHotkeysEnabled = FALSE;
+	m_gridHotkeysEnabled = TRUE; // GeneralsX @tweak Bluejanis 16/11/2026
 	m_gridHotkeyLayout.clear();
 	m_gridHotkeyColumns = 0;
 	m_nonGridHotkeys.clear();
