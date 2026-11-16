@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: read # the release job fetches the macOS zip through the API
   pull-requests: read # requested by build-macos.yml
 
 jobs:
@@ -25,19 +26,21 @@ jobs:
         with:
           sparse-checkout: .github
 
-      - name: Download Zero Hour builds
-        uses: actions/download-artifact@v4
-        with:
-          pattern: "*-*GeneralsXZH.zip"
-          path: dist
-          merge-multiple: true
+      # download-artifact unpacks the zip, which loses the macOS permissions; the API returns it as uploaded
+      - name: Download the macOS zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dist
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
+            --jq '.artifacts[] | select(.name == "macos-arm64-GeneralsXZH.zip") | .id')
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${id}/zip" > dist/macos-arm64-GeneralsXZH.zip
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ls -la dist
-          gh release create "${GITHUB_REF_NAME}" dist/*GeneralsXZH.zip \
-            --repo "${GITHUB_REPOSITORY}" \
+          gh release create "${GITHUB_REF_NAME}" dist/macos-arm64-GeneralsXZH.zip \
+            --repo "${GITHUB_REPOSITORY}" --prerelease \
             --title "GeneralsX ${GITHUB_REF_NAME}" \
             --notes-file .github/fork-release-notes.md
