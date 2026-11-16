@@ -387,6 +387,7 @@ private:
 protected:
 	GameMessage::Type findGameMessageMetaType(const char* name);
 	MetaMapRec *getMetaMapRec(GameMessage::Type t);
+	void bindKey(GameMessage::Type action, MappableKeyType key, MappableKeyModState modState);
 
 public:
 
@@ -402,6 +403,9 @@ public:
 	// TheSuperHackers @feature Function to generate default key mappings
 	// for actions that were not found in a CommandMap.ini
 	void generateMetaMap();
+
+	// GeneralsX @feature Bluejanis 16/11/2026
+	void applyKeyBindings();
 
 	void verifyMetaMap();
 
