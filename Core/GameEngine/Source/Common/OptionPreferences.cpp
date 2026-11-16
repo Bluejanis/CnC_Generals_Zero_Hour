@@ -219,11 +219,12 @@ Bool OptionPreferences::getRightMouseScrollWithAlternateMouseEnabled() const
 // TheSuperHackers @feature Grid hotkeys assign a command bar key by slot position rather than
 // by whatever letter the string file marked with an ampersand.
 // Options.ini: GridHotkeys = Yes
+// GeneralsX @tweak Bluejanis 16/11/2026 On by default in this fork; GridHotkeys = No turns it off
 Bool OptionPreferences::getGridHotkeysEnabled() const
 {
 	OptionPreferences::const_iterator it = find("GridHotkeys");
 	if (it == end())
-		return FALSE;
+		return TRUE;
 
 	if (stricmp(it->second.str(), "yes") == 0) {
 		return TRUE;
@@ -233,11 +234,12 @@ Bool OptionPreferences::getGridHotkeysEnabled() const
 
 // TheSuperHackers @feature Draw each command bar cameo's keyboard hotkey over the cameo.
 // Options.ini: KeyboardOverlay = Yes
+// GeneralsX @tweak Bluejanis 16/11/2026 On by default in this fork; KeyboardOverlay = No turns it off
 Bool OptionPreferences::getKeyboardOverlayEnabled() const
 {
 	OptionPreferences::const_iterator it = find("KeyboardOverlay");
 	if (it == end())
-		return FALSE;
+		return TRUE;
 
 	if (stricmp(it->second.str(), "yes") == 0) {
 		return TRUE;
@@ -254,8 +256,10 @@ Bool OptionPreferences::getKeyboardOverlayEnabled() const
 AsciiString OptionPreferences::getGridHotkeyLayout() const
 {
 	OptionPreferences::const_iterator it = find("GridHotkeyLayout");
+	// GeneralsX @tweak Bluejanis 16/11/2026 Default to the retail 7x2 command bar. Keys are positions,
+	// so this is QWERTZU on a German keyboard and AZERTYU on a French one.
 	if (it == end() || it->second.isEmpty())
-		return AsciiString("QWERTYUIOASDFGHJKL");
+		return AsciiString("QWERTYUASDFGHJ");
 
 	return it->second;
 }
@@ -269,7 +273,7 @@ Int OptionPreferences::getGridHotkeyColumns() const
 {
 	OptionPreferences::const_iterator it = find("GridHotkeyColumns");
 	if (it == end())
-		return 9;	// two rows of nine, matching a bar two rows deep
+		return 7;	// GeneralsX @tweak Bluejanis 16/11/2026 the retail command bar is seven wide
 
 	Int columns = atoi(it->second.str());
 	if (columns < 0)
