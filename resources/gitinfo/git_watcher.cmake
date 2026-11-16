@@ -90,6 +90,7 @@ set(_state_variable_names
     GIT_HEAD_SHORT_SHA1
     GIT_REV_LIST_COUNT
     GIT_TAG
+    GIT_DISPLAY_TAG
     # >>>
     # 1. Add the name of the additional git variable you're interested in monitoring
     #    to this list.
@@ -135,6 +136,9 @@ function(GetGitState _working_dir)
         endif()
         set(ENV{GIT_HEAD_SHA1} "0000000000000000000000000000000000000000")
         set(ENV{GIT_AUTHOR_NAME} "GitHub Actions")
+        if(DEFINED GENERALS_GIT_OVERRIDE_AUTHOR)
+            set(ENV{GIT_AUTHOR_NAME} "${GENERALS_GIT_OVERRIDE_AUTHOR}")
+        endif()
         set(ENV{GIT_AUTHOR_EMAIL} "actions@github.com")
         set(ENV{GIT_COMMIT_DATE_ISO8601} "")
         set(ENV{GIT_COMMIT_SUBJECT} "Override")
@@ -148,6 +152,12 @@ function(GetGitState _working_dir)
         set(ENV{GIT_TAG} "")
         if(DEFINED GENERALS_GIT_OVERRIDE_TAG)
             set(ENV{GIT_TAG} "${GENERALS_GIT_OVERRIDE_TAG}")
+        endif()
+        # GeneralsX @feature Bluejanis 16/11/2026 Fork release name for the menus; GitTag stays the
+        # upstream tag because the update check and the online server compare it
+        set(ENV{GIT_DISPLAY_TAG} "$ENV{GIT_TAG}")
+        if(DEFINED GENERALS_GIT_OVERRIDE_DISPLAY_TAG)
+            set(ENV{GIT_DISPLAY_TAG} "${GENERALS_GIT_OVERRIDE_DISPLAY_TAG}")
         endif()
         return()
     endif()
@@ -237,6 +247,7 @@ function(GetGitState _working_dir)
         else()
             set(ENV{GIT_TAG} "")
         endif()
+        set(ENV{GIT_DISPLAY_TAG} "$ENV{GIT_TAG}")
 
         # >>>
         # 2. Additional git properties can be added here via the
@@ -255,6 +266,7 @@ function(GetGitState _working_dir)
         set(ENV{GIT_HEAD_SHORT_SHA1} "DEADBEEF")
         set(ENV{GIT_REV_LIST_COUNT} "0")
         set(ENV{GIT_TAG} "")
+        set(ENV{GIT_DISPLAY_TAG} "")
     endif()
 
 endfunction()

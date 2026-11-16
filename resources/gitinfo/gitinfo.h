@@ -30,6 +30,7 @@ extern const char GitShortSHA1[];
 extern const char GitCommitDate[];
 extern const char GitCommitAuthorName[];
 extern const char GitTag[];
+extern const char GitDisplayTag[]; ///< Release name shown in menus; GitTag is used for version checks
 extern time_t GitCommitTimeStamp;
 extern bool GitUncommittedChanges;
 extern bool GitHaveInfo;
