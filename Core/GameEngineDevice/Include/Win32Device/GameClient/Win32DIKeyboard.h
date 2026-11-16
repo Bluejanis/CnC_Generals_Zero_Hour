@@ -77,6 +77,7 @@ public:
 	virtual void reset() override;		///< Reset the keyboard system
 	virtual void update() override;  ///< update call, extending update functionality
 	virtual Bool getCapsState() override;		///< get state of caps lock key, return TRUE if down
+	virtual WideChar getLayoutKeyLabel( KeyDefType key ) override;
 
 protected:
 

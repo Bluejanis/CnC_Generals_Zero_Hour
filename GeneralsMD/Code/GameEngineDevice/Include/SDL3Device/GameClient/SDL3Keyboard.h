@@ -57,6 +57,7 @@ public:
 	// Keyboard interface
 	virtual KeyboardIO *getKeyboard(void);
 	virtual Bool getCapsState(void);  // GeneralsX @build fbraz 12/02/2026 BenderAI - Caps Lock state
+	virtual WideChar getLayoutKeyLabel(KeyDefType key);
 	
 	// SDL3-specific methods - Fighter19 pattern
 	// GeneralsX @refactor felipebraz 16/02/2026 Add direct addSDLEvent() method

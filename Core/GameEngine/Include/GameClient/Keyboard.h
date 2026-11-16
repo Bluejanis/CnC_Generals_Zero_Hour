@@ -120,6 +120,9 @@ public:
 												 KeyboardIO::StatusType data );   ///< set key status
 	WideChar translateKey( WideChar keyCode );		///< translate key code to printable UNICODE char
 	WideChar getPrintableKey( KeyDefType key, Int state );
+	// GeneralsX @feature Bluejanis 16/11/2026 Character on this physical key in the player's keyboard layout,
+	// e.g. 'z' for KEY_Y on a German keyboard. Keys are positional, so labels must come from the layout.
+	virtual WideChar getLayoutKeyLabel( KeyDefType key ) { return getPrintableKey( key, 0 ); }
 	enum { MAX_KEY_STATES = 3};
 private:
 	void emitModifierKeyUps() const;
