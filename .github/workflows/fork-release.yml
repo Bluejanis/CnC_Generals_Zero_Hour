@@ -1,6 +1,7 @@
 name: Fork release
 
-# Builds Windows and macOS on a "*-bluejanis.*" tag and publishes the Zero Hour zips as a release.
+# Builds macOS on a "*-bluejanis.*" tag and publishes the Zero Hour zip as a release.
+# The Windows zip is built locally and added with "gh release upload".
 on:
   push:
     tags:
@@ -8,18 +9,15 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read # requested by build-macos.yml
 
 jobs:
-  windows:
-    uses: ./.github/workflows/build-windows.yml
-    secrets: inherit
-
   macos:
     uses: ./.github/workflows/build-macos.yml
     secrets: inherit
 
   release:
-    needs: [windows, macos]
+    needs: macos
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release notes

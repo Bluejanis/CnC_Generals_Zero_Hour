@@ -40,11 +40,7 @@ jobs:
             target: z_generals
             output: GeneralsXZH
             log_suffix: zh
-          - id: generalsx
-            value: Generals
-            target: g_generals
-            output: GeneralsX
-            log_suffix: generals
+          # Fork: Zero Hour only (Generals is not released here)
 
     steps:
       # GeneralsX @build GitHubCopilot 08/05/2026 Use Node 24 compatible GitHub Actions major versions to remove runner deprecation warnings.
