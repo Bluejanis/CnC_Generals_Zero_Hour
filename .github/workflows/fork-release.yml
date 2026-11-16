@@ -1,0 +1,47 @@
+name: Fork release
+
+# Builds macOS on a "*-bluejanis-<date>[-<hhmm>]" tag and publishes the Zero Hour zip as a release.
+# The Windows zip is built locally and added with "gh release upload".
+on:
+  push:
+    tags:
+      - "*-bluejanis-*"
+
+permissions:
+  contents: write
+  actions: read # the release job fetches the macOS zip through the API
+  pull-requests: read # requested by build-macos.yml
+
+jobs:
+  macos:
+    uses: ./.github/workflows/build-macos.yml
+
+  release:
+    needs: macos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release notes
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github
+
+      # download-artifact unpacks the zip, which loses the macOS permissions; the API returns it as uploaded
+      - name: Download the macOS zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dist
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=macos-arm64-GeneralsXZH.zip" \
+            --jq '.artifacts[0].id')
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${id}/zip" > dist/macos-arm64-GeneralsXZH.zip
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the Windows zip may already be uploaded, or this is a re-run
+          gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" > /dev/null 2>&1 ||
+            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --prerelease \
+              --title "GeneralsX ${GITHUB_REF_NAME}" --notes-file .github/fork-release-notes.md
+          gh release upload "${GITHUB_REF_NAME}" dist/macos-arm64-GeneralsXZH.zip \
+            --repo "${GITHUB_REPOSITORY}" --clobber

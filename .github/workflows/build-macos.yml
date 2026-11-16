@@ -40,11 +40,7 @@ jobs:
             target: z_generals
             output: GeneralsXZH
             log_suffix: zh
-          - id: generalsx
-            value: Generals
-            target: g_generals
-            output: GeneralsX
-            log_suffix: generals
+          # Fork: Zero Hour only (Generals is not released here)
 
     steps:
       # GeneralsX @build GitHubCopilot 08/05/2026 Use Node 24 compatible GitHub Actions major versions to remove runner deprecation warnings.
@@ -388,7 +384,7 @@ jobs:
           NPROC=$(sysctl -n hw.ncpu)
           echo "Building with $NPROC parallel jobs..."
           LOG_FILE="logs/build_${{ matrix.game.log_suffix }}_macos.log"
-          cmake --build build/${{ inputs.preset }} --target ${{ matrix.game.target }} -j $NPROC 2>&1 | tee "${LOG_FILE}"
+          cmake --build build/${{ inputs.preset }} --target ${{ matrix.game.target }} -j $NPROC -- -k 0 2>&1 | tee "${LOG_FILE}"
           BUILD_STATUS=${PIPESTATUS[0]}
           
           if [ $BUILD_STATUS -eq 0 ]; then
