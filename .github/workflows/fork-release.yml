@@ -1,0 +1,45 @@
+name: Fork release
+
+# Builds Windows and macOS on a "*-bluejanis.*" tag and publishes the Zero Hour zips as a release.
+on:
+  push:
+    tags:
+      - "*-bluejanis.*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    uses: ./.github/workflows/build-windows.yml
+    secrets: inherit
+
+  macos:
+    uses: ./.github/workflows/build-macos.yml
+    secrets: inherit
+
+  release:
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release notes
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github
+
+      - name: Download Zero Hour builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-*GeneralsXZH.zip"
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la dist
+          gh release create "${GITHUB_REF_NAME}" dist/*GeneralsXZH.zip \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "GeneralsX ${GITHUB_REF_NAME}" \
+            --notes-file .github/fork-release-notes.md
