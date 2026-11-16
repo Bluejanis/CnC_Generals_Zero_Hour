@@ -621,6 +621,7 @@ void GameEngine::init()
 #endif
 
 		TheMetaMap->generateMetaMap();
+		TheMetaMap->applyKeyBindings();
 		TheMetaMap->verifyMetaMap();
 
 		initSubsystem(TheActionManager,"TheActionManager", MSGNEW("GameEngineSubsystem") ActionManager(), nullptr);

@@ -781,6 +781,92 @@ MetaMapRec *MetaMap::getMetaMapRec(GameMessage::Type t)
 }
 
 //-------------------------------------------------------------------------------------------------
+// GeneralsX @feature Bluejanis 16/11/2026 Fork key defaults, moved off the command bar grid rows.
+// Keys are physical positions named by the US layout: KEY_Z is the German Y key, KEY_SLASH the
+// German minus and KEY_TICK the German caret. Options.ini: KeyBindings = Retail keeps the game's own.
+struct ForkKeyBinding
+{
+	GameMessage::Type meta;
+	MappableKeyType key;
+};
+
+static const ForkKeyBinding ForkKeyBindings[] =
+{
+	{ GameMessage::MSG_META_SELECT_MATCHING_UNITS,      MK_Z },
+	{ GameMessage::MSG_META_SELECT_ALL,                 MK_C },
+	{ GameMessage::MSG_META_STOP,                       MK_V },
+	{ GameMessage::MSG_META_VIEW_COMMAND_CENTER,        MK_B },
+	{ GameMessage::MSG_META_SELECT_NEXT_IDLE_WORKER,    MK_PERIOD },
+	{ GameMessage::MSG_META_PLACE_BEACON,               MK_SLASH },
+	{ GameMessage::MSG_META_TOGGLE_GENERALS_EXPERIENCE, MK_TICK },
+};
+
+static Bool lookupName(const LookupListRec *list, const char *name, Int &value)
+{
+	for (; list->name; ++list)
+	{
+		if (stricmp(list->name, name) == 0)
+		{
+			value = list->value;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+//-------------------------------------------------------------------------------------------------
+void MetaMap::bindKey(GameMessage::Type meta, MappableKeyType key, MappableKeyModState modState)
+{
+	MetaMapRec *map = getMetaMapRec(meta);
+	map->m_key = key;
+	map->m_modState = modState;
+	if (map->m_usableIn == COMMANDUSABLE_NONE)
+		map->m_usableIn = COMMANDUSABLE_GAME;
+}
+
+//-------------------------------------------------------------------------------------------------
+// Options.ini: Key_<ACTION> = <KEY> [<MODIFIERS>], e.g. Key_STOP = KEY_V or Key_STOP = KEY_V CTRL.
+// ACTION, KEY and MODIFIERS use the CommandMap.ini names; NONE as the key unbinds the action.
+void MetaMap::applyKeyBindings()
+{
+	OptionPreferences options;
+
+	if (stricmp(options["KeyBindings"].str(), "Retail") != 0)
+	{
+		for (const ForkKeyBinding &binding : ForkKeyBindings)
+			bindKey(binding.meta, binding.key, NONE);
+	}
+
+	for (OptionPreferences::const_iterator it = options.begin(); it != options.end(); ++it)
+	{
+		if (strnicmp(it->first.str(), "Key_", 4) != 0)
+			continue;
+
+		Int meta;
+		if (!lookupName(GameMessageMetaTypeNames, it->first.str() + 4, meta))
+		{
+			DEBUG_LOG(("Options.ini: unknown key binding action %s", it->first.str()));
+			continue;
+		}
+
+		char keyName[64] = "";
+		char modName[64] = "NONE";
+		sscanf(it->second.str(), "%63s %63s", keyName, modName);
+
+		Int key = MK_NONE;
+		Int modState = NONE;
+		if ((stricmp(keyName, "NONE") != 0 && !lookupName(KeyNames, keyName, key))
+			|| !lookupName(ModifierNames, modName, modState))
+		{
+			DEBUG_LOG(("Options.ini: invalid key binding %s = %s", it->first.str(), it->second.str()));
+			continue;
+		}
+
+		bindKey((GameMessage::Type)meta, (MappableKeyType)key, (MappableKeyModState)modState);
+	}
+}
+
+//-------------------------------------------------------------------------------------------------
 void MetaMap::generateMetaMap()
 {
 	// TheSuperHackers @info A default mapping for MSG_META_SELECT_ALL_AIRCRAFT would be useful for Generals

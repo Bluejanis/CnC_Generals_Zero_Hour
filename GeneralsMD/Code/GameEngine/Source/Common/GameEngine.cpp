@@ -761,6 +761,7 @@ void GameEngine::init()
 #endif
 
 		TheMetaMap->generateMetaMap();
+		TheMetaMap->applyKeyBindings();
 		TheMetaMap->verifyMetaMap();
 
 
