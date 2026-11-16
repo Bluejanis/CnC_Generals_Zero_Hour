@@ -4199,6 +4199,24 @@ GameMessageDisposition CommandTranslator::translateGameMessage(const GameMessage
 			break;
 
 		//-----------------------------------------------------------------------------------------
+		// GeneralsX @feature 16/11/2026 Toggle the General's Promotion screen from the keyboard, as its control bar button does
+		case GameMessage::MSG_META_TOGGLE_GENERALS_PROMOTIONS:
+		{
+			if (TheWindowManager)
+			{
+				Int id = (Int)TheNameKeyGenerator->nameToKey("ControlBar.wnd:ButtonGeneral");
+				GameWindow *button = TheWindowManager->winGetWindowFromId(nullptr, id);
+				if (button && !button->winIsHidden() && BitIsSet(button->winGetStatus(), WIN_STATUS_ENABLED))
+				{
+					HideQuitMenu();
+					TheControlBar->togglePurchaseScience();
+				}
+			}
+			disp = DESTROY_MESSAGE;
+			break;
+		}
+
+		//-----------------------------------------------------------------------------------------
 		case GameMessage::MSG_META_INCREASE_MAX_RENDER_FPS:
 		{
 			if (changeMaxRenderFps(FpsValueChange_Increase))

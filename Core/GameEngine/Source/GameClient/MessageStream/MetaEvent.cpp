@@ -152,6 +152,7 @@ static const LookupListRec GameMessageMetaTypeNames[] =
 	{ "PLACE_BEACON",															GameMessage::MSG_META_PLACE_BEACON },
 	{ "DELETE_BEACON",														GameMessage::MSG_META_REMOVE_BEACON },
 	{ "OPTIONS",																	GameMessage::MSG_META_OPTIONS },
+	{ "TOGGLE_GENERALS_PROMOTIONS",								GameMessage::MSG_META_TOGGLE_GENERALS_PROMOTIONS },
 	{ "INCREASE_MAX_RENDER_FPS",									GameMessage::MSG_META_INCREASE_MAX_RENDER_FPS },
 	{ "DECREASE_MAX_RENDER_FPS",									GameMessage::MSG_META_DECREASE_MAX_RENDER_FPS },
 	{ "INCREASE_LOGIC_TIME_SCALE",								GameMessage::MSG_META_INCREASE_LOGIC_TIME_SCALE },
