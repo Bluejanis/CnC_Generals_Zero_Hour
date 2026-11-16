@@ -235,6 +235,7 @@ public:
 		MSG_META_CHAT_EVERYONE,											///< send chat msg to everyone (incl. observers)
 		MSG_META_DIPLOMACY,													///< bring up diplomacy screen
 		MSG_META_OPTIONS,														///< bring up options screen
+		MSG_META_TOGGLE_GENERALS_EXPERIENCE,				///< GeneralsX @feature Toggle the General's Promotion screen
 #if defined(RTS_DEBUG)
 		MSG_META_HELP,															///< bring up help screen
 #endif
