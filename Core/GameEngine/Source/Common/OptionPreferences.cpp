@@ -222,6 +222,15 @@ Bool OptionPreferences::getRightMouseScrollWithAlternateMouseEnabled() const
 Bool OptionPreferences::getGridHotkeysEnabled() const
 {
 	OptionPreferences::const_iterator it = find("GridHotkeys");
+	if (it == end())
+		return FALSE;
+
+	if (stricmp(it->second.str(), "yes") == 0) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 // TheSuperHackers @feature Draw each command bar cameo's keyboard hotkey over the cameo.
 // Options.ini: KeyboardOverlay = Yes
 Bool OptionPreferences::getKeyboardOverlayEnabled() const
